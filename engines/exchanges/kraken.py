@@ -58,7 +58,7 @@ class ExchangeEngine(ExchangeEngineBase):
             response = grequests.map([req])[0].json()
 
         if 'error' in response:
-            print response
+            print(response)
         return response
   
     def get_balance(self, tickers=[]):
@@ -161,34 +161,34 @@ if __name__ == "__main__":
     engine = ExchangeEngine()
     engine.load_key('../../keys/kraken.key')
     # for res in grequests.map([engine.get_balance(['XXRP'])]):
-    #     print res.parsed
+    #     print(res.parsed
     #     pass
        
     # for res in grequests.map([engine.get_ticker_orderBook_innermost('XEOSZUSD')]):
-    #     print res.parsed
+    #     print(res.parsed
     #     pass     
 
     # for res in grequests.map([engine.get_open_order()]):
-    #     print res
+    #     print(res
     #     pass 
 
     for res in grequests.map([engine.get_ticker_lastPrice('XXBT')]):
-        print res.parsed
+        print(res.parsed)
         pass    
 
     # for res in grequests.map([engine.place_order('ETCETH', 'ask', 1.5, 0.075)]):
-    #     print res
+    #     print(res
     #     pass     
 
 
     # for res in grequests.map([engine.cancel_order('OUYOOV-W6LU5-3MTVUD')]):
-    #     print res
+    #     print(res
     #     pass     
-    #print engine.get_ticker_history('ETHUSD')
+    #print(engine.get_ticker_history('ETHUSD')
 
-    #print engine.withdraw('ETH', 'Bitfinex ETH', 0.5)
+    #print(engine.withdraw('ETH', 'Bitfinex ETH', 0.5)
     
     
-    #print engine.parseTickerData(engine.get_ticker_history('XRPUSD'))
-    #print engine.place_order('ETCETH', 'ask', 1.5, 0.075)
+    #print(engine.parseTickerData(engine.get_ticker_history('XRPUSD'))
+    #print(engine.place_order('ETCETH', 'ask', 1.5, 0.075)
     #engine.place_order('XRPUSD', 'ask', 1, 200)

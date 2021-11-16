@@ -15,9 +15,10 @@ class CryptoEngineExArbitrage(object):
         self.engineB = EngineLoader.getEngine(self.exParams['exchangeB']['exchange'], self.exParams['exchangeB']['keyFile'])
 
     def start_engine(self):
-        print strftime('%Y%m%d%H%M%S') + ' starting Exchange Arbitrage Engine...'
+        print(strftime('%Y%m%d%H%M%S') + ' starting Exchange Arbitrage Engine...')
         if self.mock:
-            print '---------------------------- MOCK MODE ----------------------------'
+            print('---------------------------- MOCK MODE ----------------------------')
+        
         #Send the request asynchronously
         while True:
             try:
@@ -30,8 +31,8 @@ class CryptoEngineExArbitrage(object):
                             self.place_order(bookStatus['status'], bookStatus['ask'], bookStatus['bid'], bookStatus['maxAmount'])
                     else:
                         self.rebalance()
-            except Exception, e:
-                print e
+            except Exception as e:
+                print(e)
 
             #time.sleep(self.engineA.sleepTime)
             time.sleep(self.engineA.sleepTime + 10)
@@ -40,36 +41,36 @@ class CryptoEngineExArbitrage(object):
         if self.openOrderCheckCount >= 5:
             self.cancel_allOrders()
         else:
-            print 'checking open orders...'
+            print('Checking open orders...')
             rs = [self.engineA.get_open_order(),
                   self.engineB.get_open_order()]
             responses = self.send_request(rs)
 
             if not responses[0] or not responses[1]:
-                print responses
+                print(responses)
                 return False
             
             if responses[0].parsed or responses[1].parsed:
                 self.engineA.openOrders = responses[0].parsed
                 self.engineB.openOrders = responses[1].parsed
-                print self.engineA.openOrders, self.engineB.openOrders
+                print(self.engineA.openOrders, self.engineB.openOrders)
                 self.openOrderCheckCount += 1
             else:
                 self.hasOpenOrder = False
-                print 'no open orders'
-                print 'starting to check order book...'
+                print('No open orders')
+                print('Starting to check order book...')
     
     def cancel_allOrders(self):
-        print 'cancelling all open orders...'
+        print('Cancelling all open orders...')
         rs = []
-        print self.exParams['exchangeA']['exchange']
+        print(self.exParams['exchangeA']['exchange'])
         for order in self.engineA.openOrders:
-            print order
+            print(order)
             rs.append(self.engineA.cancel_order(order['orderId']))
 
-        print self.exParams['exchangeB']['exchange']
+        print(self.exParams['exchangeB']['exchange'])
         for order in self.engineB.openOrders:
-            print order
+            print(order)
             rs.append(self.engineB.cancel_order(order['orderId']))
 
         responses = self.send_request(rs)
@@ -94,12 +95,12 @@ class CryptoEngineExArbitrage(object):
                 for ticker in res.parsed:
                     # This may not be accurate
                     if res.parsed[ticker] < 0.05:
-                        print ticker, res.parsed[ticker], '- Not Enough'
+                        print(ticker, res.parsed[ticker], '- Not Enough')
                         return False
         return True
     
     def rebalance(self):
-        print 'rebalancing...'
+        print('Rebalancing...')
 
     def check_orderBook(self):
         rs = [self.engineA.get_ticker_orderBook_innermost(self.exParams['exchangeA']['tickerPair']),
@@ -107,12 +108,12 @@ class CryptoEngineExArbitrage(object):
 
         responses = self.send_request(rs)
         
-        print "{0} - {1}; {2} - {3}".format(
+        print("{0} - {1}; {2} - {3}".format(
             self.exParams['exchangeA']['exchange'],
             responses[0].parsed,
             self.exParams['exchangeB']['exchange'],
             responses[1].parsed
-            )
+            ))
 
         diff_A = responses[0].parsed['ask']['price'] - responses[1].parsed['bid']['price']
         diff_B = responses[1].parsed['ask']['price'] - responses[0].parsed['bid']['price']
@@ -124,12 +125,12 @@ class CryptoEngineExArbitrage(object):
             fee = self.engineA.feeRatio * maxAmount * responses[0].parsed['ask']['price'] + self.engineB.feeRatio * maxAmount * responses[1].parsed['bid']['price']
 
             if abs(diff_A * maxAmount) - fee > self.minProfit:
-                print "{0}'s Ask {1} - {2}'s Bid {3} < 0".format(
+                print("{0}'s Ask {1} - {2}'s Bid {3} < 0".format(
                     self.exParams['exchangeA']['exchange'], 
                     responses[0].parsed['ask']['price'],
                     self.exParams['exchangeB']['exchange'], 
-                    responses[1].parsed['bid']['price'])       
-                print '{0} (diff) * {1} (amount) = {2}, commission fee: {3}'.format(diff_A, maxAmount, abs(diff_A * maxAmount), fee)            
+                    responses[1].parsed['bid']['price']))    
+                print('{0} (diff) * {1} (amount) = {2}, commission fee: {3}'.format(diff_A, maxAmount, abs(diff_A * maxAmount), fee))           
                 return {'status': 1, 'ask': responses[0].parsed['ask']['price'], 'bid': responses[1].parsed['bid']['price'], 'maxAmount': maxAmount}
             else:
                 return {'status': 0}
@@ -140,12 +141,12 @@ class CryptoEngineExArbitrage(object):
             fee = self.engineB.feeRatio * maxAmount * responses[1].parsed['ask']['price'] + self.engineA.feeRatio * maxAmount * responses[0].parsed['bid']['price']
 
             if abs(diff_B * maxAmount) - fee > self.minProfit:
-                print "{0}'s Ask {1} - {2}'s Bid {3} < 0".format(
+                print("{0}'s Ask {1} - {2}'s Bid {3} < 0".format(
                     self.exParams['exchangeB']['exchange'], 
                     responses[1].parsed['ask']['price'], 
                     self.exParams['exchangeA']['exchange'], 
-                    responses[0].parsed['bid']['price'])             
-                print '{0} (diff) * {1} (amount) = {2}, commission fee: {3}'.format(diff_B, maxAmount, abs(diff_B * maxAmount), fee)   
+                    responses[0].parsed['bid']['price']))
+                print('{0} (diff) * {1} (amount) = {2}, commission fee: {3}'.format(diff_B, maxAmount, abs(diff_B * maxAmount), fee))
                 return {'status': 2, 'ask': responses[1].parsed['ask']['price'], 'bid': responses[0].parsed['bid']['price'], 'maxAmount': maxAmount}
             else:
                 return {'status': 0}
@@ -168,17 +169,17 @@ class CryptoEngineExArbitrage(object):
         return amount
 
     def place_order(self, status, ask, bid, amount):
-        print 'placing order...'
+        print('Placing order...')
         # Buy from Exchange A, Sell to Exchange B                
         if status == 1:
-            print strftime('%Y%m%d%H%M%S') + ' Buy at {0} @ {1} & Sell at {2} @ {3} for {4}'.format(ask, self.exParams['exchangeA']['exchange'], bid, self.exParams['exchangeB']['exchange'], amount)
+            print(strftime('%Y%m%d%H%M%S') + ' Buy at {0} @ {1} & Sell at {2} @ {3} for {4}'.format(ask, self.exParams['exchangeA']['exchange'], bid, self.exParams['exchangeB']['exchange'], amount))
             rs = [
                 self.engineA.place_order(self.exParams['exchangeA']['tickerPair'], 'bid', amount, ask),
                 self.engineB.place_order(self.exParams['exchangeB']['tickerPair'], 'ask', amount, bid),                
             ]
         # Buy from Exchange B, Sell to Exchange A
         elif status == 2:
-            print strftime('%Y%m%d%H%M%S') + ' Buy at {0} @ {1} & Sell at {2} @ {3} for {4}'.format(ask, self.exParams['exchangeB']['exchange'], bid, self.exParams['exchangeA']['exchange'], amount)
+            print(strftime('%Y%m%d%H%M%S') + ' Buy at {0} @ {1} & Sell at {2} @ {3} for {4}'.format(ask, self.exParams['exchangeB']['exchange'], bid, self.exParams['exchangeA']['exchange'], amount))
             rs = [
                 self.engineB.place_order(self.exParams['exchangeB']['tickerPair'], 'bid', amount, ask),
                 self.engineA.place_order(self.exParams['exchangeA']['tickerPair'], 'ask', amount, bid),                
@@ -193,7 +194,7 @@ class CryptoEngineExArbitrage(object):
         responses = grequests.map(rs)
         for res in responses:
             if not res:
-                print responses
+                print(responses)
                 raise Exception
         return responses
 

@@ -50,7 +50,7 @@ class ExchangeEngine(ExchangeEngineBase):
             response = grequests.map([req])[0].json()
             
             if 'error' in response:
-                print response
+                print(response)
             return response
     '''
         return in r.parsed, showing all and required tickers
@@ -114,7 +114,7 @@ class ExchangeEngine(ExchangeEngineBase):
      
     def hook_orderBook(self, r, *r_args, **r_kwargs):
         json = r.json()
-        #print json
+        #print(json
         r.parsed = {
                     'bid':  {
                              'price': float(json['bids'][0][0]),
@@ -139,7 +139,7 @@ class ExchangeEngine(ExchangeEngineBase):
     
     def hook_openOrder(self, r, *r_args, **r_kwargs):
         json = r.json()
-        print json
+        print(json)
         r.parsed = []
         for order in json:
             r.parsed.append({'orderId': str(order['id']), 'created': order['datetime']})
@@ -176,26 +176,26 @@ if __name__ == "__main__":
     engine = ExchangeEngine()
     engine.load_key('../../keys/bitstamp.key')
     # for res in grequests.map([engine.get_balance(['btc', 'eth'])]):
-    #     print res.parsed
+    #     print(res.parsed
     #     pass    
     for res in grequests.map([engine.get_ticker_lastPrice('btcusd')]):
-        print res.parsed
+        print(res.parsed)
     pass    
     # for res in grequests.map([engine.get_ticker_orderBook_innermost('ethbtc')]):
-    #     print res.parsed
+    #     print(res.parsed
     #     pass
     # for res in grequests.map([engine.get_open_order()]):
-    #     print res.parsed
+    #     print(res.parsed
     #     pass    
     # for res in grequests.map([engine.place_order("ethbtc", "ask", 0.5, 0.5)]):
-    #     print res.json()
-    #     #print res.parsed/
+    #     print(res.json()
+    #     #print(res.parsed/
     #     pass    
     # for res in grequests.map([engine.cancel_order('624731173')]):
-    #     print res.json()
-    #     #print res.parsed
+    #     print(res.json()
+    #     #print(res.parsed
     #     pass       
     # for res in grequests.map([engine.withdraw('eth', 500, '0xC257274276a4E539741Ca11b590B9447B26A8051')]):
-    #     print res.json()
-    #     #print res.parsed
+    #     print(res.json()
+    #     #print(res.parsed
     #     pass       

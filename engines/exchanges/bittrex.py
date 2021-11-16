@@ -50,7 +50,7 @@ class ExchangeEngine(ExchangeEngineBase):
             response = grequests.map([req])[0].json()
             
             if 'error' in response:
-                print response
+                print(response)
             return response
     '''
         return in r.parsed, showing all and required tickers
@@ -111,7 +111,7 @@ class ExchangeEngine(ExchangeEngineBase):
      
     def hook_orderBook(self, r, *r_args, **r_kwargs):
         json = r.json()
-        #print json
+        #print(json
         r.parsed = {
                     'bid':  {
                              'price': float(json['result']['buy'][0]['Rate']),
@@ -166,14 +166,14 @@ if __name__ == "__main__":
     engine = ExchangeEngine()
     engine.load_key('../../keys/bittrex.key')
     # for res in grequests.map([engine.get_ticker_orderBook_innermost('ETH-OMG')]):
-    #     print res.parsed
+    #     print(res.parsed
     #     pass
     for res in grequests.map([engine.get_ticker_lastPrice('LTC')]):
-        print res.parsed
+        print(res.parsed)
         pass    
-    #print engine.get_ticker_orderBook('ETH-OMG')
-    #print engine.parseTickerData(engine.get_ticker_history('XRPUSD'))
-    #print engine.place_order('ETH-OMG', 'bid', 10, 0.01)
-    #print engine.withdraw('ETH', 500, '0x54A82261bAAc1357069E23d953F8dbC8BD2A54F4')
-    #print engine.get_open_order()
-    #print engine.cancel_order('9faa6b5b-6709-4435-aec8-fe96f1fa32bb')
+    #print(engine.get_ticker_orderBook('ETH-OMG')
+    #print(engine.parseTickerData(engine.get_ticker_history('XRPUSD'))
+    #print(engine.place_order('ETH-OMG', 'bid', 10, 0.01)
+    #print(engine.withdraw('ETH', 500, '0x54A82261bAAc1357069E23d953F8dbC8BD2A54F4')
+    #print(engine.get_open_order()
+    #print(engine.cancel_order('9faa6b5b-6709-4435-aec8-fe96f1fa32bb')

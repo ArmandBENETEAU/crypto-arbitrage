@@ -59,7 +59,7 @@ class ExchangeEngine(ExchangeEngineBase):
             response = grequests.map([req])[0].json()
             
             if 'error' in response:
-                print response
+                print(response)
             return response    
     
     
@@ -177,21 +177,21 @@ class ExchangeEngine(ExchangeEngineBase):
 if __name__ == "__main__":
     engine = ExchangeEngine()
     engine.load_key('../../keys/bitfinex.key')
-    #print engine.get_balance()
+    #print(engine.get_balance()
     for res in grequests.map([engine.get_ticker_lastPrice('BTCUSD')]):
-        print res.parsed
+        print(res.parsed)
         pass    
 
     # for res in grequests.map([engine.cancel_order('525113932211')]):
-    #     print res.json()
+    #     print(res.json()
     #     pass    
 
 #     for res in grequests.map([engine.place_order('OMGETH', 'bid', 5, 0.02)]):
-#         print res.json()
+#         print(res.json()
 #         pass
 #        
-    #print engine.get_open_order()
+    #print(engine.get_open_order()
     #engine.place_order('OMGETH', 'bid', 40, 0.01)
-    #print engine.get_ticker_orderBook('OMGETH')
-    #print engine.place_order('OMGETH', 'bid', 850, 0.02)
-    #print engine.cancel_order(446915287)
+    #print(engine.get_ticker_orderBook('OMGETH')
+    #print(engine.place_order('OMGETH', 'bid', 850, 0.02)
+    #print(engine.cancel_order(446915287)

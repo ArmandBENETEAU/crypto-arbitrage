@@ -15,7 +15,7 @@ class CryptoEngineRules:
   
     
     def start_engine(self):
-        print 'starting engine...'
+        print('Starting engine...')
         mod = __import__(self.exchange)
         cls = mod.ExchangeEngine()
         cls.load_key(self.keyFile)
