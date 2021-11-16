@@ -21,9 +21,10 @@ Mock mode is enabled by default, which does not place any order and just check a
 1. The trading fee is the largest obstacle. Most of the exchanges have a 0.25% fee. The profit will be larger if the fee can be lower.
 2. Sometimes not all the placed orders are executed, so there will be some manual work to rebalance. The bot should be able to deal with this situation, such as placing a market order, instead of just cancelling the open orders.
 
-## Further Improvement
-1. Implement exchange rebalancing
-2. Handle open orders strategically
-3. Refactoring  
-
-I will put this project on hold now as the price goes up and down so much. Hope this can help anyone with similar interests.
+## Further Improvement: TODO
+1. Refactoring to python3
+2. Use proper async code with python3 (aiohttp)
+3. Use Decimal class instead of float for calculations
+4. Implement "Coinbase Pro" exchange since it is the one I'm using
+5. Handle open orders strategically?
+6. Implement exchange rebalancing?
