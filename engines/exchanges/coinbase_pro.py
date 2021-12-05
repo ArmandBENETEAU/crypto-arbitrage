@@ -19,11 +19,13 @@ import calendar
 from decimal import Decimal
 from base import ExchangeException
 from mod_imports import *
+from typing import Dict, List
 import time
 
 class ExchangeEngine(ExchangeEngineBase):
     def __init__(self, filename):
-        self.API_URL = 'https://api.exchange.coinbase.com'
+        # self.API_URL = "https://api.exchange.coinbase.com"
+        self.API_URL = "https://api-public.sandbox.exchange.coinbase.com"
         self.apiVersion = 'v1.0'
         self.feeRatio = Decimal(0.0050)
         self.sleepTime = 5
@@ -83,7 +85,7 @@ class ExchangeEngine(ExchangeEngineBase):
         }
 
         # Send the request
-        response = await self.client_session.request(upper_method, f"{self.API_URL}{full_cmd}", data=params, headers=additional_headers)
+        response = await self.client_session.request(upper_method, f"{self.API_URL}{full_cmd}", data=msg_body, headers=additional_headers)
 
         # Get the answer as dictionary
         async with response:
@@ -95,7 +97,7 @@ class ExchangeEngine(ExchangeEngineBase):
     async def place_order(self, ticker, action, amount, price):
         pass
   
-    async def get_balance(self, tickers: list=[]) -> dict:
+    async def get_balance(self, tickers: list=[]) -> Dict[str, float]:
         '''
         Return the balance of all the tickers given by the caller. A ticker is the unique
         way to call a crypto-currency, like BTC, ETH, XRP, etc.
@@ -130,20 +132,140 @@ class ExchangeEngine(ExchangeEngineBase):
             return result
     
     async def get_ticker_history(self, ticker):
-        pass
+        raise NotImplementedError("This function seems not needed for Triangular arbitrage")
+
+    async def get_ticker_lastPrice(self, ticker: str) -> Dict[str, float]:
+        '''
+        Get the last price in EUR for a ticker.
+        A ticker is the unique way to call a crypto-currency, like BTC, ETH, XRP, etc.
+
+        The result is a dictionnary, looking like the following:
+
+        {
+            'XLM': 1.1
+        }
+        '''
+        # Create the resulting dict
+        result = {}
+
+        # Create the product ID wanted
+        product_id = f"{ticker}-EUR"
+
+        # Send the request allowing to get the ticker price
+        product_ticker = await self._send_request(f"products/{product_id}/ticker", "GET")
+
+        # Get the price and convert it to float
+        result[ticker] = float(product_ticker["price"])
+        
+        return result
+
+    async def get_ticker_orderBook_innermost(self, ticker_pair: str) -> Dict[str, Dict[str, float]]:
+        '''
+        Get the order book for a ticker pair, it returns the best bid and ask.
+        A ticker pair looks like that: "XLM-BTC", "BTC-EUR", etc.
+
+        The result is a dictionnary, looking like the following:
+
+        {
+            'bid': {
+                'price': 0.02202,
+                'amount': 1103.5148
+            },
+            'ask': {
+                'price': 0.02400,
+                'amount': 103.2
+            }         
+        }
+        '''
+        # Create the resulting dict
+        result = {"bid": {}, "ask": {}}
+        
+        # Send the request allowing to get the ticker pair orderbook
+        book = await self._send_request(f"products/{ticker_pair}/book", "GET")
+
+        # Get the values we want
+        result["bid"]["price"] = float(book["bids"][0][0])
+        result["bid"]["amount"] = float(book["bids"][0][1])
+        result["ask"]["price"] = float(book["asks"][0][0])
+        result["ask"]["amount"] = float(book["asks"][0][1])
+
+        return result
+
+    async def get_open_order(self) -> List[Dict[str, float]]:
+        '''
+        Return the list of open orders currently existing
+
+        The result is a dictionnary, looking like the following:
+
+        [
+            {
+                'orderId': '1242424'
+            }
+        ]
+        '''
+        # Create the result list
+        result = []
+
+        # Get the list of orders
+        orders = await self._send_request("orders?limit=100", "GET")
+
+        # For each order just save the ID
+        for order in orders:
+            tmp_dict = {"orderId": order["id"]}
+            result.append(tmp_dict)
+
+        return result
+
+    async def place_order(self, ticker_pair: str, action: str, amount: float, price: float):
+        '''
+        Place an order on the exchange platform.
+        The type of order wanted here is the limit order.
+        Here are an example of possible values for the args.
+
+        ticker_pair: 'ETH-ETC'
+        action: 'bid' or 'ask'
+        amount: 700
+        price: 0.2
+        '''
+        # Define the action wanted
+        action = 'buy' if action == 'bid' else 'sell'
+
+        # Initiates the body of the request
+        req_body = {
+            "type": "limit",
+            "side": action,
+            "product_id": ticker_pair,
+            "price": str(price),
+            "size": str(amount)
+        }
+        
+        return await self._send_request("orders", "POST", params=req_body)
+
+    async def cancel_order(self, orderID):
+        '''
+        Function allowing to cancel an order that has been previously open
+        '''
+        return await self._send_request(f"orders/{orderID}", "DELETE")
 
     async def end_engine(self):
         if self.client_session is not None:
             await self.client_session.close()
 
 if __name__ == "__main__":
-    engine = ExchangeEngine('keys/coinbasepro.key')
+    engine = ExchangeEngine('keys/coinbasepro_sandbox.key')
 
     async def main():
-        # answer = await engine._send_request("accounts", "GET")
-        answer = await engine.get_balance(tickers=["XLM", "EOS", "BTC"])
-        answer_str = json.dumps(answer, indent=4)
-        print(answer_str)
+
+        try:
+            # answer = await engine._send_request("orders", "GET")
+            answer = await engine.cancel_order("dd2c7c9a-f595-448b-a94d-ba17d6748614")
+            answer_str = json.dumps(answer, indent=4)
+            print(answer_str)
+
+        except Exception as err:
+            print("Something bad happened:")
+            print(str(err))
+
         await engine.end_engine()
 
     loop = asyncio.get_event_loop()
