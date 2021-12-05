@@ -1,10 +1,13 @@
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
+import asyncio
 import json
 
-class ExchangeEngineBase:
-    __metaclass__ = ABCMeta
+class ExchangeException(BaseException):
+    pass
+
+class ExchangeEngineBase(ABC):
     @abstractmethod
-    def __init__(self):
+    def __init__(self, filename):
         pass
     
     def load_key(self, filename):
@@ -12,23 +15,21 @@ class ExchangeEngineBase:
             self.key = json.load(f)
             
     @abstractmethod
-    def _send_request(self):
+    async def _send_request(self):
         pass
     
     @abstractmethod
-    def place_order(self, ticker, action, amount, price):
+    async def place_order(self, ticker, action, amount, price):
         pass
   
     @abstractmethod
-    def get_balance(self):
+    async def get_balance(self):
         pass
     
     
-    #@abstractmethod
-    def get_ticker_history(self, ticker):
+    @abstractmethod
+    async def get_ticker_history(self, ticker):
         pass
-    
-   
        
     '''
     Format: e.g. {'exchange': 'gatecoin', 'ticker': 'BTCHKD', 'data': [{price: (int)30.5}]}
