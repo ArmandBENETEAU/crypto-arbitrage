@@ -1,4 +1,5 @@
 import argparse
+import asyncio
 import json
 
 configFile = 'arbitrage_config.json'
@@ -15,9 +16,8 @@ engine = None
 isMockMode = True if not args.production else False
 
 if args.mode == 'triangular':
-    # from engines.triangular_arbitrage import CryptoEngineTriArbitrage
-    # engine = CryptoEngineTriArbitrage(config['triangular'], isMockMode)
-    pass
+    from engines.triangular_arbitrage import CryptoEngineTriArbitrage
+    engine = CryptoEngineTriArbitrage(config['triangular'], isMockMode)
 elif args.mode == 'exchange':
     # from engines.exchange_arbitrage import CryptoEngineExArbitrage
     # engine = CryptoEngineExArbitrage(config['exchange'], isMockMode)
@@ -25,5 +25,8 @@ elif args.mode == 'exchange':
 else:
     print(f"Mode {args.mode} is not recognized")
 
-# if engine:
-#     engine.run()
+async def main():
+    await engine.run()
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(main())
