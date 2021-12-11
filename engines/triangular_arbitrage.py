@@ -140,6 +140,7 @@ class CryptoEngineTriArbitrage(object):
             #     bidRoute_profit, askRoute_profit, fee
             # )
             if status == 1 and bidRoute_profit - fee > self.minProfitUSDT:
+                print("\nOpportunity found!")
                 print(strftime('%Y%m%d%H%M%S') + ' Bid Route: Result - {0} Profit - {1} Fee - {2}'.format(bidRoute_result, bidRoute_profit, fee))
                 orderInfo = [
                     {
@@ -163,6 +164,7 @@ class CryptoEngineTriArbitrage(object):
                 ]
                 return {'status': 1, "orderInfo": orderInfo}
             elif status == 2 and askRoute_profit - fee > self.minProfitUSDT:
+                print("\nOpportunity found!")
                 print(strftime('%Y%m%d%H%M%S') + ' Ask Route: Result - {0} Profit - {1} Fee - {2}'.format(askRoute_result, askRoute_profit, fee))
                 orderInfo = [
                     {
@@ -253,12 +255,12 @@ if __name__ == '__main__':
         exchange = {
             'exchange': 'coinbase_pro',
             'keyFile': 'keys/coinbasepro.key',
-            'tickerPairA': 'ETH-BTC',
-            'tickerPairB': 'ADA-ETH',
+            'tickerPairA': 'ADA-ETH',
+            'tickerPairB': 'ETH-BTC',
             'tickerPairC': 'ADA-BTC',
-            'tickerA': 'BTC',
+            'tickerA': 'ADA',
             'tickerB': 'ETH',
-            'tickerC': 'ADA'
+            'tickerC': 'BTC'
         }    
         engine = CryptoEngineTriArbitrage(exchange, True)
         await engine.run()
