@@ -6,7 +6,7 @@ class EngineLoader(object):
     @staticmethod
     def getEngine(exchange, keyFile):
         mod = __import__(exchange)
-        engine = mod.ExchangeEngine()
-        engine.load_key(keyFile)
+        engine = mod.ExchangeEngine(keyFile)
+        # engine.load_key(keyFile)
         return engine
     

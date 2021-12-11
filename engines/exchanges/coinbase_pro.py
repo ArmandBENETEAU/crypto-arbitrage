@@ -16,7 +16,6 @@ $1b+                0.04%           0.00%
 import asyncio
 from datetime import datetime, timedelta
 import calendar
-from decimal import Decimal
 from base import ExchangeException
 from mod_imports import *
 from typing import Dict, List
@@ -24,10 +23,10 @@ import time
 
 class ExchangeEngine(ExchangeEngineBase):
     def __init__(self, filename):
-        # self.API_URL = "https://api.exchange.coinbase.com"
-        self.API_URL = "https://api-public.sandbox.exchange.coinbase.com"
+        self.API_URL = "https://api.exchange.coinbase.com"
+        # self.API_URL = "https://api-public.sandbox.exchange.coinbase.com"
         self.apiVersion = 'v1.0'
-        self.feeRatio = Decimal(0.0050)
+        self.feeRatio = float(0.0050)
         self.sleepTime = 5
 
         self.load_key(filename)
