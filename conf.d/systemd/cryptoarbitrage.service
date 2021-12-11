@@ -1,0 +1,12 @@
+[Unit]
+Description=Automatic trading bot using Triangular or Exchange Arbitrages
+Documentation=https://github.com/ArmandBENETEAU/python3-crypto-arbitrage
+After=network.target
+
+[Service]
+User=pi
+Type=simple
+ExecStart=/usr/bin/python3 /home/pi/projects/python3-crypto-arbitrage/main.py -m triangular
+
+[Install]
+WantedBy=multi-user.target
