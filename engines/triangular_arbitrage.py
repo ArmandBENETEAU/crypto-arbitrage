@@ -4,6 +4,7 @@ import asyncio
 import os 
 import sys
 from engines.exchanges.loader import EngineLoader
+from utils.logging import crypto_arb_log
 
 class CryptoEngineTriArbitrage(object):
     def __init__(self, exchange, mock=False):
@@ -16,9 +17,9 @@ class CryptoEngineTriArbitrage(object):
         self.engine = EngineLoader.getEngine(self.exchange['exchange'], self.exchange['keyFile'])
 
     async def start_engine(self):
-        print(strftime('%Y%m%d%H%M%S') + ' starting Triangular Arbitrage Engine...')
+        crypto_arb_log.info(strftime('%Y%m%d%H%M%S') + ' starting Triangular Arbitrage Engine...')
         if self.mock:
-            print('---------------------------- MOCK MODE ----------------------------')
+            crypto_arb_log.info('---------------------------- MOCK MODE ----------------------------')
         #Send the request asynchronously
         while True:
             try:
@@ -30,7 +31,7 @@ class CryptoEngineTriArbitrage(object):
                         await self.place_order(bookStatus['orderInfo'])
             except Exception as e:
                # raise
-               print(e)
+               crypto_arb_log.error(e)
             
             await asyncio.sleep(self.engine.sleepTime)
     
@@ -38,28 +39,28 @@ class CryptoEngineTriArbitrage(object):
         if self.openOrderCheckCount >= 5:
             await self.cancel_allOrders()
         else:
-            print('checking open orders...')
+            crypto_arb_log.info('Checking open orders...')
             responses = await asyncio.gather(self.engine.get_open_order())
 
             if not responses[0]:
-                print(responses)
+                crypto_arb_log.info(responses)
                 return False
             
             if responses[0]:
                 self.engine.openOrders = responses[0]
-                print(self.engine.openOrders)
+                crypto_arb_log.info(self.engine.openOrders)
                 self.openOrderCheckCount += 1
             else:
                 self.hasOpenOrder = False
-                print('no open orders')
-                print('starting to check order book...')
+                crypto_arb_log.info('No open orders')
+                crypto_arb_log.info('Starting to check order book...')
     
     async def cancel_allOrders(self):
-        print('cancelling all open orders...')
+        crypto_arb_log.info('Cancelling all open orders...')
         coros = []
-        print(self.exchange['exchange'])
+        crypto_arb_log.info(self.exchange['exchange'])
         for order in self.engine.openOrders:
-            print(order)
+            crypto_arb_log.info(order)
             coros.append(self.engine.cancel_order(order['orderId']))
 
         responses = await asyncio.gather(*coros)
@@ -104,10 +105,11 @@ class CryptoEngineTriArbitrage(object):
             self.engine.get_ticker_orderBook_innermost(self.exchange['tickerPairC']))
         
         if self.mock:
-            print("\n--- Current order books ---")
-            print('{0} - {1};'.format(self.exchange['tickerPairA'], responses[0]))
-            print('{0} - {1};'.format(self.exchange['tickerPairB'], responses[1]))
-            print('{0} - {1};'.format(self.exchange['tickerPairC'], responses[2]))
+            crypto_arb_log.info("")
+            crypto_arb_log.info("--- Current order books ---")
+            crypto_arb_log.info('{0} - {1};'.format(self.exchange['tickerPairA'], responses[0]))
+            crypto_arb_log.info('{0} - {1};'.format(self.exchange['tickerPairB'], responses[1]))
+            crypto_arb_log.info('{0} - {1};'.format(self.exchange['tickerPairC'], responses[2]))
         
         # bid route BTC->ETH->LTC->BTC
         bidRoute_result = (1 / responses[0]['ask']['price']) \
@@ -140,8 +142,8 @@ class CryptoEngineTriArbitrage(object):
             #     bidRoute_profit, askRoute_profit, fee
             # )
             if status == 1 and bidRoute_profit - fee > self.minProfitUSDT:
-                print("\nOpportunity found!")
-                print(strftime('%Y%m%d%H%M%S') + ' Bid Route: Result - {0} Profit - {1} Fee - {2}'.format(bidRoute_result, bidRoute_profit, fee))
+                crypto_arb_log.info("\nOpportunity found!")
+                crypto_arb_log.info(strftime('%Y%m%d%H%M%S') + ' Bid Route: Result - {0} Profit - {1} Fee - {2}'.format(bidRoute_result, bidRoute_profit, fee))
                 orderInfo = [
                     {
                         "tickerPair": self.exchange['tickerPairA'],
@@ -164,8 +166,8 @@ class CryptoEngineTriArbitrage(object):
                 ]
                 return {'status': 1, "orderInfo": orderInfo}
             elif status == 2 and askRoute_profit - fee > self.minProfitUSDT:
-                print("\nOpportunity found!")
-                print(strftime('%Y%m%d%H%M%S') + ' Ask Route: Result - {0} Profit - {1} Fee - {2}'.format(askRoute_result, askRoute_profit, fee))
+                crypto_arb_log.info("\nOpportunity found!")
+                crypto_arb_log.info(strftime('%Y%m%d%H%M%S') + ' Ask Route: Result - {0} Profit - {1} Fee - {2}'.format(askRoute_result, askRoute_profit, fee))
                 orderInfo = [
                     {
                         "tickerPair": self.exchange['tickerPairA'],
@@ -219,7 +221,7 @@ class CryptoEngineTriArbitrage(object):
         return maxAmounts
 
     async def place_order(self, orderInfo):
-        print(orderInfo)
+        crypto_arb_log.info(orderInfo)
         coros = []
         for order in orderInfo:
             coros.append(self.engine.place_order(

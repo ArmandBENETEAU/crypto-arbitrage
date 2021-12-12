@@ -2,6 +2,8 @@ import argparse
 import asyncio
 import json
 
+from utils.logging import crypto_arb_log
+
 configFile = 'arbitrage_config.json'
 
 with open(configFile) as cfg_file: 
@@ -23,7 +25,7 @@ elif args.mode == 'exchange':
     # engine = CryptoEngineExArbitrage(config['exchange'], isMockMode)
     pass
 else:
-    print(f"Mode {args.mode} is not recognized")
+    crypto_arb_log.error(f"Mode {args.mode} is not recognized")
 
 async def main():
     await engine.run()
