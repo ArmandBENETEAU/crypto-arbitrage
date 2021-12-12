@@ -91,10 +91,6 @@ class ExchangeEngine(ExchangeEngineBase):
             content = await response.json()
 
         return content
-
-
-    async def place_order(self, ticker, action, amount, price):
-        pass
   
     async def get_balance(self, tickers: list=[]) -> Dict[str, float]:
         '''
