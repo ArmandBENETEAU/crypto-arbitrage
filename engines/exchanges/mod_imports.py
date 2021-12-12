@@ -1,6 +1,5 @@
 import json
-import requests
-import grequests
+import aiohttp
 import hmac
 import hashlib
 import base64
